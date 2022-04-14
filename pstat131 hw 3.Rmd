@@ -1,0 +1,119 @@
+---
+title: "pstat 131 hw 3"
+output: html_document
+---
+
+```{r}
+library(tidymodels)
+library(ISLR) 
+library(ISLR2) 
+library(discrim)
+library(poissonreg)
+library(corrr)
+library(corrplot)
+library(klaR) 
+tidymodels_prefer()
+titanic<- read_csv('/Users/ankitapattnaik/Downloads/homework-3/data/titanic.csv')
+titanic_cdbk<- read_csv('/Users/ankitapattnaik/Downloads/homework-3/data/titanic_codebook.txt')
+```
+
+1. Split the data, stratifying on the outcome variable, survived. You should choose the proportions to split the data into. Verify that the training and testing data sets have the appropriate number of observations. Take a look at the training data and note any potential issues, such as missing data.
+
+```{r}
+set.seed(3435)
+
+titanic_split <- initial_split(titanic, prop = 0.70,
+                                strata = survived)
+titanic_train <- training(titanic_split)
+titanic_test <- testing(titanic_split)
+
+titanic_train
+```
+
+Why is it a good idea to use stratified sampling for this data?
+- It is a good idea to use stratified sampling for this data because by taking a part of the data, we can make assumptions based on demographics and draw conclusions on all the data based off the stratified chunk. This allows us to work with less data and be more clean with our work, that way we can draw conclusions on the population as a whole. 
+
+
+2. Using the training data set, explore/describe the distribution of the outcome variable survived.
+
+```{r}
+titanic_train %>% 
+  ggplot(aes(x = survived)) +
+  geom_bar()
+```
+
+
+3. Using the training data set, create a correlation matrix of all continuous variables. Create a visualization of the matrix, and describe any patterns you see. Are any predictors correlated with each other? Which ones, and in which direction?
+
+```{r}
+
+cor_titanic <- titanic_train %>%
+  select(where(is.numeric)) %>%
+  correlate()
+rplot(cor_titanic) 
+
+```
+
+4. Using the training data, create a recipe predicting the outcome variable survived. Include the following predictors: ticket class, sex, age, number of siblings or spouses aboard, number of parents or children aboard, and passenger fare.
+
+Next, use step_dummy() to dummy encode categorical predictors. Finally, include interactions between:
+
+Sex and passenger fare, and
+Age and passenger fare.
+
+
+```{r}
+titanic_recipe <- recipe(survived ~ pclass + sex + age + sib_sp + 
+                           parch + fare, data = titanic_train) %>%
+  step_impute_linear() %>%
+  step_dummy(all_nominal_predictors()) %>% 
+  step_interact(terms = ~ starts_with("sex"):fare) %>%
+  step_interact( ~ age:fare) 
+```
+
+5. Specify a logistic regression model for classification using the "glm" engine. Then create a workflow. Add your model and the appropriate recipe. Finally, use fit() to apply your workflow to the training data.
+
+```{r}
+log_reg <- logistic_reg() %>% 
+  set_engine("glm") %>% 
+  set_mode("classification")
+
+log_wkflow <- workflow() %>% 
+  add_model(log_reg) %>% 
+  add_recipe(titanic_recipe)
+
+log_fit <- fit(log_wkflow, titanic_train)
+```
+
+6. Repeat Question 5, but this time specify a linear discriminant analysis model for classification using the "MASS" engine.
+
+```{r}
+lda_mod <- discrim_linear() %>% 
+  set_mode("classification") %>% 
+  set_engine("MASS")
+
+lda_wkflow <- workflow() %>% 
+  add_model(lda_mod) %>% 
+  add_recipe(titanic_recipe)
+
+lda_fit <- fit(lda_wkflow, titanic_train)
+```
+
+7. Repeat Question 5, but this time specify a quadratic discriminant analysis model for classification using the "MASS" engine.
+
+```{r}
+qda_mod <- discrim_quad() %>% 
+  set_mode("classification") %>% 
+  set_engine("MASS")
+
+qda_wkflow <- workflow() %>% 
+  add_model(qda_mod) %>% 
+  add_recipe(titanic_recipe)
+
+qda_fit <- fit(qda_wkflow, titanic_train)
+```
+
+8.Repeat Question 5, but this time specify a naive Bayes model for classification using the "klaR" engine. Set the usekernel argument to FALSE.
+
+```{r}
+```
