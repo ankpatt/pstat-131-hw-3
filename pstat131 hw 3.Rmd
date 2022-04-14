@@ -3,8 +3,9 @@ title: "pstat 131 hw 3"
 output: html_document
 ---
 
-```{r}
+```{r, message= FALSE}
 library(tidymodels)
+library(tidyverse)
 library(ISLR) 
 library(ISLR2) 
 library(discrim)
@@ -13,6 +14,8 @@ library(corrr)
 library(corrplot)
 library(klaR) 
 tidymodels_prefer()
+```
+```{r}
 titanic<- read_csv('/Users/ankitapattnaik/Downloads/homework-3/data/titanic.csv')
 titanic_cdbk<- read_csv('/Users/ankitapattnaik/Downloads/homework-3/data/titanic_codebook.txt')
 ```
@@ -42,8 +45,9 @@ titanic_train %>%
   geom_bar()
 ```
 
+- Less people survived than not. We see this through a bar plot. 
 
-3. Using the training data set, create a correlation matrix of all continuous variables. Create a visualization of the matrix, and describe any patterns you see. Are any predictors correlated with each other? Which ones, and in which direction?
+3. Using the training data set, create a correlation matrix of all continuous variables. Create a visualization of the matrix, and describe any patterns you see. 
 
 ```{r}
 
@@ -53,6 +57,15 @@ cor_titanic <- titanic_train %>%
 rplot(cor_titanic) 
 
 ```
+
+Are any predictors correlated with each other? Which ones, and in which direction?
+- It seems that sib_sp (# of spouses and siblings abroad the titanic) and parch (# of children and parents on the titanic) have strong positive correlation. 
+- fare and parch have distinct positive correlation.
+- sib_sp and fare, age and fare, sib_sp and pclass all have very little positive correlation
+- pclass (ticket class) and fare (passenger fare) have a strong negative correlation. 
+- age and pclass, age and sib_sp have distinct negative correlation
+- age and parch have light negative correlation
+- passenger_id and sib_sp have light negative correlation. 
 
 4. Using the training data, create a recipe predicting the outcome variable survived. Include the following predictors: ticket class, sex, age, number of siblings or spouses aboard, number of parents or children aboard, and passenger fare.
 
@@ -113,7 +126,26 @@ qda_wkflow <- workflow() %>%
 qda_fit <- fit(qda_wkflow, titanic_train)
 ```
 
-8.Repeat Question 5, but this time specify a naive Bayes model for classification using the "klaR" engine. Set the usekernel argument to FALSE.
+8.Repeat Question 5, but this time specify a naive Bayes model for classification using the "klaR" engine. Set the usekernel argument to FALSE. 
 
 ```{r}
+nb_mod <- naive_Bayes() %>% 
+  set_mode("classification") %>% 
+  set_engine("klaR") %>% 
+  set_args(usekernel = FALSE) 
+
+nb_wkflow <- workflow() %>% 
+  add_model(nb_mod) %>% 
+  add_recipe(titanic_recipe)
+
+nb_fit <- fit(nb_wkflow, titanic_train)
 ```
+9. Now you’ve fit four different models to your training data.
+
+Use predict() and bind_cols() to generate predictions using each of these 4 models and your training data. Then use the accuracy metric to assess the performance of each of the four models.
+
+```{r}
+
+```
+Which model achieved the highest accuracy on the training data?
+
