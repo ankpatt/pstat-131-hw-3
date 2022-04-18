@@ -13,6 +13,7 @@ library(poissonreg)
 library(corrr)
 library(corrplot)
 library(klaR) 
+library(pROC)
 tidymodels_prefer()
 ```
 ```{r}
@@ -208,6 +209,17 @@ augment(log_fit, new_data = titanic_test) %>%
   conf_mat(truth = survived, estimate = .pred_class)
 
 augment(log_fit, new_data = titanic_test) %>%
-  roc_curve(survived, .pred_Down) %>%
+  roc_curve(survived, .pred_No) %>%
   autoplot()
+
+augment(log_fit, new_data = titanic_test) %>%
+  roc_auc(survived, .pred_No) 
+
+
+
+
 ```
+
+I would assume the model did well because the area under the curve is 0.88 which represents the probability of the survived not surviving at 88% which is quite high. There is a 0.07 difference between the test and training data accuracies with binary estimator. The values might a little because of the methods of measuring accuracies, as well as the data that correlates with the split data. The test and training data both have a different amount of observations so that is why the observations might predict a slightly different outcome. 
+
+
