@@ -32,7 +32,6 @@ titanic_split <- initial_split(titanic, prop = 0.70,
 titanic_train <- training(titanic_split)
 titanic_test <- testing(titanic_split)
 
-titanic_train
 ```
 
 Why is it a good idea to use stratified sampling for this data?
@@ -163,7 +162,7 @@ nb_fit <- fit(nb_wkflow, titanic_train)
 
 Use predict() and bind_cols() to generate predictions using each of these 4 models and your training data. Then use the accuracy metric to assess the performance of each of the four models.
 
-```{r}
+```{r warning = FALSE}
 titanic_log<-predict(log_fit, new_data = titanic_train, type = "prob")
 titanic_log_col<-bind_cols(titanic_log, titanic_train)
 log_reg_acc<- augment(log_fit, new_data= titanic_train) %>% accuracy(truth=survived, estimate=.pred_class)
