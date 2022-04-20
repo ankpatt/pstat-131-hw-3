@@ -1,0 +1,12 @@
+---
+title: "127 hw 2"
+output: html_document
+---
+
+```{r}
+set.seed(4)
+x <- arima.sim(n=300, model=list(ma=c(2,-8))) #simulates 300 values of Xt
+acf.obj <- acf(x, main=expression(paste("ACF of", X[t]))) #plots the sample acf values
+acf.obj$acf[3] #gives us sample estimate at px(2).
+```
+
